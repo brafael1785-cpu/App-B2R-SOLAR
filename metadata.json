@@ -1,0 +1,6 @@
+{
+  "name": "B2R Solar",
+  "description": "Aplicativo de orçamentos e propostas de energia solar fotovoltaica com gestão de clientes, histórico, agenda e geração de PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

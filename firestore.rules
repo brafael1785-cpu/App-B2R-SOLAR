@@ -1,0 +1,277 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidTimestamp(ts) {
+      return ts is timestamp && ts <= request.time;
+    }
+
+    function isValidCompanySettings(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.companyName is string && data.companyName.size() >= 1 && data.companyName.size() <= 100 &&
+             data.documentNumber is string && data.documentNumber.size() <= 30 &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.email is string && data.email.size() <= 120 &&
+             data.address is string && data.address.size() <= 200 &&
+             data.defaultState is string && data.defaultState.size() == 2 &&
+             data.defaultCity is string && data.defaultCity.size() <= 80 &&
+             data.kwhTariff is number && data.kwhTariff >= 0.1 && data.kwhTariff <= 10.0 &&
+             data.pricePerWp is number && data.pricePerWp >= 0.5 && data.pricePerWp <= 20.0 &&
+             data.defaultValidityDays is int && data.defaultValidityDays >= 1 && data.defaultValidityDays <= 180 &&
+             data.defaultTemplate is int && data.defaultTemplate >= 1 && data.defaultTemplate <= 5 &&
+             data.logoConfigured is bool;
+    }
+
+    function isValidSolarClient(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.email is string && data.email.size() <= 120 &&
+             data.state is string && data.state.size() == 2 &&
+             data.city is string && data.city.size() <= 80 &&
+             data.connectionType in ['MONOFASICO', 'BIFASICO', 'TRIFASICO'] &&
+             data.avgConsumptionKwh is number && data.avgConsumptionKwh >= 0.0 && data.avgConsumptionKwh <= 500000.0 &&
+             data.notes is string && data.notes.size() <= 400;
+    }
+
+    function isValidSolarProposal(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.proposalCode is string && data.proposalCode.size() >= 1 && data.proposalCode.size() <= 32 &&
+             data.clientId is string && data.clientId.size() <= 128 &&
+             data.clientName is string && data.clientName.size() >= 1 && data.clientName.size() <= 100 &&
+             data.clientPhone is string && data.clientPhone.size() <= 30 &&
+             data.state is string && data.state.size() == 2 &&
+             data.city is string && data.city.size() <= 80 &&
+             data.systemType in ['ON_GRID', 'HIBRIDO'] &&
+             data.connectionType in ['MONOFASICO', 'BIFASICO', 'TRIFASICO'] &&
+             data.consumptionInput is number && data.consumptionInput >= 0.0 && data.consumptionInput <= 500000.0 &&
+             data.panelCount is int && data.panelCount >= 1 && data.panelCount <= 10000 &&
+             data.panelModel is string && data.panelModel.size() >= 1 && data.panelModel.size() <= 140 &&
+             data.panelPowerW is int && data.panelPowerW >= 50 && data.panelPowerW <= 2000 &&
+             data.powerKwp is number && data.powerKwp >= 0.1 && data.powerKwp <= 10000.0 &&
+             data.inverters is list && data.inverters.size() >= 1 && data.inverters.size() <= 10 &&
+             (data.inverters[0] is string && data.inverters[0].size() >= 1 && data.inverters[0].size() <= 140) &&
+             data.batterySummary is string && data.batterySummary.size() <= 140 &&
+             data.totalPrice is number && data.totalPrice >= 1.0 && data.totalPrice <= 50000000.0 &&
+             data.cashEnabled is bool &&
+             data.cardEnabled is bool &&
+             data.financingEnabled is bool &&
+             data.boletoEnabled is bool &&
+             data.cardInstallments is int && data.cardInstallments >= 0 && data.cardInstallments <= 60 &&
+             data.cardFeePercent is number && data.cardFeePercent >= 0.0 && data.cardFeePercent <= 100.0 &&
+             data.templateModel is int && data.templateModel >= 1 && data.templateModel <= 5 &&
+             data.estimatedMonthlyKwh is number && data.estimatedMonthlyKwh >= 0.0 && data.estimatedMonthlyKwh <= 1000000.0 &&
+             data.estimatedMonthlySavings is number && data.estimatedMonthlySavings >= 0.0 && data.estimatedMonthlySavings <= 5000000.0 &&
+             data.paybackMonths is int && data.paybackMonths >= 0 && data.paybackMonths <= 600 &&
+             data.status in ['EM_ANALISE', 'APROVADA', 'FECHADA', 'RECUSADA'];
+    }
+
+    function isValidAgendaAppointment(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.title is string && data.title.size() >= 2 && data.title.size() <= 120 &&
+             data.clientName is string && data.clientName.size() <= 100 &&
+             data.dateLabel is string && data.dateLabel.size() >= 4 && data.dateLabel.size() <= 30 &&
+             data.visitType in ['VISITA_TECNICA', 'APRESENTACAO', 'INSTALACAO', 'FOLLOW_UP'] &&
+             data.notes is string && data.notes.size() <= 400 &&
+             data.completed is bool;
+    }
+
+    function isValidSolarEquipment(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.kind in ['MODULO', 'INVERSOR', 'BATERIA'] &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 140 &&
+             data.powerValue is number && data.powerValue >= 0.1 && data.powerValue <= 50000.0;
+    }
+
+    match /users/{userId} {
+      match /settings/{settingId} {
+        allow list: if isOwner(userId);
+        allow get, delete: if isOwner(userId) && isValidId(settingId);
+        allow create: if isOwner(userId) &&
+                         isValidId(settingId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'companyName', 'documentNumber', 'phone', 'email', 'address',
+                           'defaultState', 'defaultCity', 'kwhTariff', 'pricePerWp',
+                           'defaultValidityDays', 'defaultTemplate', 'logoConfigured',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'companyName', 'documentNumber', 'phone', 'email', 'address',
+                           'defaultState', 'defaultCity', 'kwhTariff', 'pricePerWp',
+                           'defaultValidityDays', 'defaultTemplate', 'logoConfigured',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestamp(incoming().createdAt) &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         isValidCompanySettings(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(settingId) &&
+                         isValidCompanySettings(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'companyName', 'documentNumber', 'phone', 'email', 'address',
+                           'defaultState', 'defaultCity', 'kwhTariff', 'pricePerWp',
+                           'defaultValidityDays', 'defaultTemplate', 'logoConfigured', 'updatedAt'
+                         ]);
+      }
+
+      match /clients/{clientId} {
+        allow list: if isOwner(userId);
+        allow get, delete: if isOwner(userId) && isValidId(clientId);
+        allow create: if isOwner(userId) &&
+                         isValidId(clientId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'name', 'phone', 'email', 'state', 'city',
+                           'connectionType', 'avgConsumptionKwh', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'name', 'phone', 'email', 'state', 'city',
+                           'connectionType', 'avgConsumptionKwh', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestamp(incoming().createdAt) &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         isValidSolarClient(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(clientId) &&
+                         isValidSolarClient(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'name', 'phone', 'email', 'state', 'city',
+                           'connectionType', 'avgConsumptionKwh', 'notes', 'updatedAt'
+                         ]);
+      }
+
+      match /proposals/{proposalId} {
+        allow list: if isOwner(userId);
+        allow get, delete: if isOwner(userId) && isValidId(proposalId);
+        allow create: if isOwner(userId) &&
+                         isValidId(proposalId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'proposalCode', 'clientId', 'clientName', 'clientPhone',
+                           'state', 'city', 'systemType', 'connectionType', 'consumptionInput',
+                           'panelCount', 'panelModel', 'panelPowerW', 'powerKwp', 'inverters',
+                           'batterySummary', 'totalPrice', 'cashEnabled', 'cardEnabled',
+                           'financingEnabled', 'boletoEnabled', 'cardInstallments', 'cardFeePercent',
+                           'templateModel', 'estimatedMonthlyKwh', 'estimatedMonthlySavings',
+                           'paybackMonths', 'status', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'proposalCode', 'clientId', 'clientName', 'clientPhone',
+                           'state', 'city', 'systemType', 'connectionType', 'consumptionInput',
+                           'panelCount', 'panelModel', 'panelPowerW', 'powerKwp', 'inverters',
+                           'batterySummary', 'totalPrice', 'cashEnabled', 'cardEnabled',
+                           'financingEnabled', 'boletoEnabled', 'cardInstallments', 'cardFeePercent',
+                           'templateModel', 'estimatedMonthlyKwh', 'estimatedMonthlySavings',
+                           'paybackMonths', 'status', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestamp(incoming().createdAt) &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         isValidSolarProposal(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(proposalId) &&
+                         isValidSolarProposal(incoming()) &&
+                         existing().status != 'FECHADA' &&
+                         incoming().userId == existing().userId &&
+                         incoming().proposalCode == existing().proposalCode &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         (
+                           incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) ||
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'clientId', 'clientName', 'clientPhone', 'state', 'city',
+                             'systemType', 'connectionType', 'consumptionInput', 'panelCount',
+                             'panelModel', 'panelPowerW', 'powerKwp', 'inverters', 'batterySummary',
+                             'totalPrice', 'cashEnabled', 'cardEnabled', 'financingEnabled',
+                             'boletoEnabled', 'cardInstallments', 'cardFeePercent', 'templateModel',
+                             'estimatedMonthlyKwh', 'estimatedMonthlySavings', 'paybackMonths',
+                             'status', 'updatedAt'
+                           ])
+                         );
+      }
+
+      match /appointments/{appointmentId} {
+        allow list: if isOwner(userId);
+        allow get, delete: if isOwner(userId) && isValidId(appointmentId);
+        allow create: if isOwner(userId) &&
+                         isValidId(appointmentId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'title', 'clientName', 'dateLabel', 'visitType',
+                           'notes', 'completed', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'title', 'clientName', 'dateLabel', 'visitType',
+                           'notes', 'completed', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestamp(incoming().createdAt) &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         isValidAgendaAppointment(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(appointmentId) &&
+                         isValidAgendaAppointment(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         (
+                           incoming().diff(existing()).affectedKeys().hasOnly(['completed', 'updatedAt']) ||
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'title', 'clientName', 'dateLabel', 'visitType',
+                             'notes', 'completed', 'updatedAt'
+                           ])
+                         );
+      }
+
+      match /equipment/{equipmentId} {
+        allow list: if isOwner(userId);
+        allow get, delete: if isOwner(userId) && isValidId(equipmentId);
+        allow create: if isOwner(userId) &&
+                         isValidId(equipmentId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'kind', 'name', 'powerValue', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'kind', 'name', 'powerValue', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestamp(incoming().createdAt) &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         isValidSolarEquipment(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(equipmentId) &&
+                         isValidSolarEquipment(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidTimestamp(incoming().updatedAt) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'kind', 'name', 'powerValue', 'updatedAt'
+                         ]);
+      }
+    }
+  }
+}

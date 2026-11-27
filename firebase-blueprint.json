@@ -1,0 +1,154 @@
+{
+  "entities": {
+    "CompanySettings": {
+      "title": "CompanySettings",
+      "description": "Configurações da empresa integradora de energia solar para geração de orçamentos e PDFs.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID do usuário autenticado" },
+        "companyName": { "type": "string", "description": "Nome da empresa" },
+        "documentNumber": { "type": "string", "description": "CNPJ ou CPF" },
+        "phone": { "type": "string", "description": "Telefone ou WhatsApp" },
+        "email": { "type": "string", "description": "E-mail comercial" },
+        "address": { "type": "string", "description": "Endereço completo" },
+        "defaultState": { "type": "string", "description": "UF padrão da instalação" },
+        "defaultCity": { "type": "string", "description": "Cidade padrão" },
+        "kwhTariff": { "type": "number", "description": "Tarifa média de energia em R$/kWh" },
+        "pricePerWp": { "type": "number", "description": "Preço referência em R$/Wp" },
+        "defaultValidityDays": { "type": "integer", "description": "Validade padrão da proposta em dias" },
+        "defaultTemplate": { "type": "integer", "description": "Modelo padrão de PDF (1 a 5)" },
+        "logoConfigured": { "type": "boolean", "description": "Indica se a logo local foi configurada" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp de criação via serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp de atualização via serverTimestamp()" }
+      },
+      "required": [
+        "userId", "companyName", "documentNumber", "phone", "email", "address",
+        "defaultState", "defaultCity", "kwhTariff", "pricePerWp", "defaultValidityDays",
+        "defaultTemplate", "logoConfigured", "createdAt", "updatedAt"
+      ]
+    },
+    "SolarClient": {
+      "title": "SolarClient",
+      "description": "Cliente cadastrado para geração de orçamentos solares.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "state": { "type": "string" },
+        "city": { "type": "string" },
+        "connectionType": { "type": "string", "enum": ["MONOFASICO", "BIFASICO", "TRIFASICO"] },
+        "avgConsumptionKwh": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "name", "phone", "email", "state", "city",
+        "connectionType", "avgConsumptionKwh", "notes", "createdAt", "updatedAt"
+      ]
+    },
+    "SolarProposal": {
+      "title": "SolarProposal",
+      "description": "Orçamento / proposta comercial de energia solar fotovoltaica.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "proposalCode": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientPhone": { "type": "string" },
+        "state": { "type": "string" },
+        "city": { "type": "string" },
+        "systemType": { "type": "string", "enum": ["ON_GRID", "HIBRIDO"] },
+        "connectionType": { "type": "string", "enum": ["MONOFASICO", "BIFASICO", "TRIFASICO"] },
+        "consumptionInput": { "type": "number" },
+        "panelCount": { "type": "integer" },
+        "panelModel": { "type": "string" },
+        "panelPowerW": { "type": "integer" },
+        "powerKwp": { "type": "number" },
+        "inverters": { "type": "array" },
+        "batterySummary": { "type": "string" },
+        "totalPrice": { "type": "number" },
+        "cashEnabled": { "type": "boolean" },
+        "cardEnabled": { "type": "boolean" },
+        "financingEnabled": { "type": "boolean" },
+        "boletoEnabled": { "type": "boolean" },
+        "cardInstallments": { "type": "integer" },
+        "cardFeePercent": { "type": "number" },
+        "templateModel": { "type": "integer" },
+        "estimatedMonthlyKwh": { "type": "number" },
+        "estimatedMonthlySavings": { "type": "number" },
+        "paybackMonths": { "type": "integer" },
+        "status": { "type": "string", "enum": ["EM_ANALISE", "APROVADA", "FECHADA", "RECUSADA"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "proposalCode", "clientId", "clientName", "clientPhone", "state", "city",
+        "systemType", "connectionType", "consumptionInput", "panelCount", "panelModel",
+        "panelPowerW", "powerKwp", "inverters", "batterySummary", "totalPrice",
+        "cashEnabled", "cardEnabled", "financingEnabled", "boletoEnabled",
+        "cardInstallments", "cardFeePercent", "templateModel", "estimatedMonthlyKwh",
+        "estimatedMonthlySavings", "paybackMonths", "status", "createdAt", "updatedAt"
+      ]
+    },
+    "AgendaAppointment": {
+      "title": "AgendaAppointment",
+      "description": "Agendamento de visita técnica, apresentação ou instalação.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "clientName": { "type": "string" },
+        "dateLabel": { "type": "string" },
+        "visitType": { "type": "string", "enum": ["VISITA_TECNICA", "APRESENTACAO", "INSTALACAO", "FOLLOW_UP"] },
+        "notes": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "title", "clientName", "dateLabel", "visitType",
+        "notes", "completed", "createdAt", "updatedAt"
+      ]
+    },
+    "SolarEquipment": {
+      "title": "SolarEquipment",
+      "description": "Equipamento personalizado cadastrado pelo integrador (módulo, inversor ou bateria).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "kind": { "type": "string", "enum": ["MODULO", "INVERSOR", "BATERIA"] },
+        "name": { "type": "string" },
+        "powerValue": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "kind", "name", "powerValue", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/CompanySettings" },
+      "description": "Configurações da empresa do usuário"
+    },
+    "/users/{userId}/clients/{clientId}": {
+      "schema": { "$ref": "#/entities/SolarClient" },
+      "description": "Clientes do usuário"
+    },
+    "/users/{userId}/proposals/{proposalId}": {
+      "schema": { "$ref": "#/entities/SolarProposal" },
+      "description": "Orçamentos e propostas geradas pelo usuário"
+    },
+    "/users/{userId}/appointments/{appointmentId}": {
+      "schema": { "$ref": "#/entities/AgendaAppointment" },
+      "description": "Agenda de visitas e instalações do usuário"
+    },
+    "/users/{userId}/equipment/{equipmentId}": {
+      "schema": { "$ref": "#/entities/SolarEquipment" },
+      "description": "Catálogo personalizado de equipamentos do usuário"
+    }
+  }
+}

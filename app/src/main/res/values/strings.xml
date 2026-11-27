@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">B2R Solar</string>
+    <string name="brand_title">B2R SOLAR</string>
+    <string name="brand_subtitle">PROPOSTAS SOLARES</string>
+    <string name="sign_in_google">Entrar com Google</string>
+    <string name="sign_out">Sair</string>
+    <string name="share_proposal_chooser">Compartilhar proposta PDF</string>
+    <string name="open_proposal_chooser">Abrir proposta PDF</string>
+</resources>
